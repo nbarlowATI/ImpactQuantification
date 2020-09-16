@@ -178,7 +178,7 @@ def main():
     parser = argparse.ArgumentParser(description="Get info from github API")
     parser.add_argument("--repo",help="repository name")
     parser.add_argument("--owner",help="repository owner")
-    parser.add_argument("--traffic",help="get clones, views for past 14 days (requires authentication", default=True, action='store_true')
+    parser.add_argument("--traffic",help="get clones, views for past 14 days (requires authentication", action='store_true')
     parser.add_argument("--PAT",help="If the user has one, input a Personal Access Token (with 'repo' scope)")
     parser.add_argument("--input_filename",help="Name of input file")
     parser.add_argument("--output_filename",help="Name of output csv file")

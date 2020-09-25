@@ -96,7 +96,8 @@ def main():
 
     input_df = make_dataframe_from_input(args.input_csv)
     results = []
-    for i in range(len(input_df)):
+#    for i in range(len(input_df)):
+    for i in range(10):
         row = input_df.loc[i]
         result = process_row(i, row)
         results.append(result)

@@ -7,6 +7,7 @@ python github_repo_popularity.py --repo <repo_name> --owner <owner>
 """
 
 import os
+import time
 import argparse
 import requests
 from requests.auth import HTTPBasicAuth
@@ -16,7 +17,7 @@ import uuid
 import re
 import datetime
 
-GITHUB_REGEX = re.compile("http(s)?://github.com/[-\w]+/[-\w]+$")
+GITHUB_REGEX = re.compile("http(s)?://github.com/[-\w]+/[-\w\.]+$")
 
 BASE_URI = "https://api.github.com"
 
@@ -34,23 +35,22 @@ def get_oauth_token():
                             "note": "token for getting repo info: uid: {}".format(uuid.uuid1())}
                       )
     response = json.loads(r.content.decode("utf-8"))
-    if r.status_code is not 201:
+    if r.status_code != 201:
         message = response["message"]
         raise RuntimeError("Unable to get OAuth token: {}".format(message))
     return response["token"]
 
 
-def get_traffic(owner, repo, token=None):
+def get_traffic(owner, repo, token):
     """
     get views and clones for the past 14 days.
-    Requires authentication - user can provide a PAT, or be prompted
-    for username and password to generate one.  (Note, this doesn't work
-    if they have 2-factor authentication enabled on their github account).
+    Requires authentication - user must provide a PAT.
     """
 
-    if not token:
-        token = get_oauth_token()
-    headers = {"Authorization": "token {}".format(token)}
+    headers = {
+        "Authorization": "Bearer {}".format(token),
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
     return_dict = {"views": ["n/a"], "clones": ["n/a"]}
     for resource in return_dict.keys():
         uri = "{}/repos/{}/{}/traffic/{}".format(BASE_URI,
@@ -144,6 +144,7 @@ def process_input_file(input_filename, traffic, PAT):
     results = {}
     infile = open(input_filename)
     for line in infile.readlines():
+        time.sleep(2)
         if not GITHUB_REGEX.search(line.strip()):
             raise RuntimeError("Not a Github URL! {}".format(line.strip()))
         owner, repo = line.strip().split("/")[-2:]
